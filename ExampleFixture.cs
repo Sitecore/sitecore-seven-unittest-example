@@ -1,13 +1,13 @@
-﻿namespace ContentSearchTest
+﻿namespace Sitecore.ContentSearchTest
 {
     using System.Collections.Generic;
     using System.Linq;
 
-    using NUnit.Framework;
-
     using FakeItEasy;
 
     using FluentAssertions;
+
+    using NUnit.Framework;
 
     using Sitecore.ContentSearch;
     using Sitecore.ContentSearch.Linq;
@@ -19,16 +19,13 @@
         private ISearchIndex fakeIndex;
         private IProviderSearchContext fakeSearchContext;
 
-        #region A region here simply because Martin hates regions
-        #endregion
-
         [SetUp]
         public void Setup()
         {
-            fakeIndex = A.Fake<ISearchIndex>();
-            fakeSearchContext = A.Fake<IProviderSearchContext>();
+            this.fakeIndex = A.Fake<ISearchIndex>();
+            this.fakeSearchContext = A.Fake<IProviderSearchContext>();
             
-            A.CallTo(() => fakeIndex.CreateSearchContext(SearchSecurityOptions.DisableSecurityCheck)).Returns(fakeSearchContext);
+            A.CallTo(() => this.fakeIndex.CreateSearchContext(SearchSecurityOptions.DisableSecurityCheck)).Returns(this.fakeSearchContext);
         }
 
         #region Simple Test - Fake all results + queryable
@@ -45,10 +42,10 @@
                                   new TestDocument { Id = 3, Title = "cat" }
                               };
 
-            A.CallTo(() => fakeSearchContext.GetQueryable<TestDocument>()).Returns(new SimpleFakeRepo<TestDocument>(listDoc));
+            A.CallTo(() => this.fakeSearchContext.GetQueryable<TestDocument>()).Returns(new SimpleFakeRepo<TestDocument>(listDoc));
 
             // Act
-            var ctx = fakeIndex.CreateSearchContext(SearchSecurityOptions.DisableSecurityCheck);
+            var ctx = this.fakeIndex.CreateSearchContext(SearchSecurityOptions.DisableSecurityCheck);
             var queryable = ctx.GetQueryable<TestDocument>();
             var results = queryable.Where(t => t.Title.Contains("cat")).ToList();
 
@@ -63,7 +60,7 @@
         #region Advanced Test - Testing with custom extension methods
 
         [Test]
-        public void Queryable_EnhancedResults_ReturnCorrectAmountofResults()
+        public void Queryable_EnhancedResults_ReturnCorrectAmountOfResults()
         {
             // Arrange
             var listDoc = new List<TestDocument>
@@ -74,10 +71,10 @@
                               };
 
             var fakeQueryable = new AdvancedFakeRepo<TestDocument>(listDoc);
-            A.CallTo(() => fakeSearchContext.GetQueryable<TestDocument>()).Returns(fakeQueryable);
+            A.CallTo(() => this.fakeSearchContext.GetQueryable<TestDocument>()).Returns(fakeQueryable);
 
             //Act
-            var ctx = fakeIndex.CreateSearchContext(SearchSecurityOptions.DisableSecurityCheck);
+            var ctx = this.fakeIndex.CreateSearchContext(SearchSecurityOptions.DisableSecurityCheck);
             var queryable = ctx.GetQueryable<TestDocument>();
             var query = queryable.Where(t => t.Title.Contains("cat"));
             var results = fakeQueryable.GetResults(query);
@@ -94,12 +91,12 @@
 
     public class TestDocument
     {
-        [IndexField("_id")]
+        [IndexField(BuiltinFields.ID)]
         public int Id { get; set; }
 
         public string Title { get; set; }
 
-        [IndexField("_templatename")]
+        [IndexField(BuiltinFields.TemplateName)]
         public string TemplateName { get; set; }
     }
 
